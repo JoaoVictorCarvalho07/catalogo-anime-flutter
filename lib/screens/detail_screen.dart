@@ -38,7 +38,9 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   void _retry() {
-    setState(() => _detail = _api.fetchDetail(widget.preview.id));
+    setState(() {
+      _detail = _api.fetchDetail(widget.preview.id);
+    });
   }
 
   @override

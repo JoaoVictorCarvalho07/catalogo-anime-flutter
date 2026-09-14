@@ -51,7 +51,9 @@ class _CatalogScreenState extends State<CatalogScreen> {
   }
 
   void _retryFirstPage() {
-    setState(() => _initialLoad = _loadFirstPage());
+    setState(() {
+      _initialLoad = _loadFirstPage();
+    });
   }
 
   Future<void> _loadMore() async {
