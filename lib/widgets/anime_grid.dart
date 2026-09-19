@@ -28,20 +28,20 @@ class AnimeGrid extends StatelessWidget {
         MediaQuery.textScalerOf(context).scale(titleStyle?.fontSize ?? 14);
     final titleHeight = scaledFontSize * (titleStyle?.height ?? 1.43) * 2 + 20;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final available = constraints.maxWidth - _padding * 2;
-        final columns = math.max(
-          2,
-          ((available + _spacing) / (_maxTileWidth + _spacing)).ceil(),
-        );
-        final tileWidth = (available - _spacing * (columns - 1)) / columns;
+    return Column(
+      children: [
+        Expanded(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final available = constraints.maxWidth - _padding * 2;
+              final columns = math.max(
+                2,
+                ((available + _spacing) / (_maxTileWidth + _spacing)).ceil(),
+              );
+              final tileWidth = (available - _spacing * (columns - 1)) / columns;
 
-        return CustomScrollView(
-          slivers: [
-            SliverPadding(
-              padding: const EdgeInsets.all(_padding),
-              sliver: SliverGrid.builder(
+              return GridView.builder(
+                padding: const EdgeInsets.all(_padding),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: columns,
                   mainAxisSpacing: _spacing,
@@ -57,12 +57,12 @@ class AnimeGrid extends StatelessWidget {
                     onTap: () => onTap(anime),
                   );
                 },
-              ),
-            ),
-            if (footer case final footer?) SliverToBoxAdapter(child: footer),
-          ],
-        );
-      },
+              );
+            },
+          ),
+        ),
+        ?footer,
+      ],
     );
   }
 }
