@@ -7,6 +7,7 @@ import 'package:catalogo_anime/screens/catalog_screen.dart';
 import 'package:catalogo_anime/screens/detail_screen.dart';
 import 'package:catalogo_anime/services/anime_api_service.dart';
 import 'package:catalogo_anime/services/local_store.dart';
+import 'package:catalogo_anime/widgets/anime_search_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -164,5 +165,44 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(Provider.of<AuthProvider>(context, listen: false).isLoggedIn, isFalse);
+  });
+
+  testWidgets('sugestões aparecem ao digitar e abrem o detalhe', (tester) async {
+    await tester.pumpWidget(await _buildApp(_api()));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'one');
+    await tester.pump(AnimeSearchField.debounce);
+    await tester.pumpAndSettle();
+
+    final suggestion = find.widgetWithText(ListTile, 'Encontrado');
+    expect(suggestion, findsOneWidget);
+
+    await tester.tap(suggestion);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(DetailScreen), findsOneWidget);
+  });
+
+  testWidgets('uma letra só não dispara sugestões', (tester) async {
+    await tester.pumpWidget(await _buildApp(_api()));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'o');
+    await tester.pump(AnimeSearchField.debounce);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ListTile), findsNothing);
+  });
+
+  testWidgets('sem resultado não mostra lista de sugestões', (tester) async {
+    await tester.pumpWidget(await _buildApp(_api()));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'inexistente');
+    await tester.pump(AnimeSearchField.debounce);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ListTile), findsNothing);
   });
 }

@@ -39,12 +39,16 @@ class AnimeApiService {
   }
 
   Future<Anime?> searchFirst(String query) async {
+    final results = await searchSuggestions(query, limit: 1);
+    return results.isEmpty ? null : results.first;
+  }
+
+  Future<List<Anime>> searchSuggestions(String query, {int limit = 6}) async {
     final body = await _getJson(Uri.https(_host, _animePath, {
       'filter[text]': query,
-      'page[limit]': '1',
+      'page[limit]': '$limit',
     }));
-    final results = _animeList(body);
-    return results.isEmpty ? null : results.first;
+    return _animeList(body);
   }
 
   Future<Anime> fetchDetail(String id) async {

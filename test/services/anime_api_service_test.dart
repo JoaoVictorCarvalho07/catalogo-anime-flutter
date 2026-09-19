@@ -122,4 +122,25 @@ void main() {
     );
     expect(api.fetchPage(), _apiError('demorou'));
   });
+
+  test('searchSuggestions pede várias opções e devolve a lista', () async {
+    late Uri requested;
+    final api = AnimeApiService(
+      client: MockClient((request) async {
+        requested = request.url;
+        return _json({
+          'data': [
+            {'id': '1', 'attributes': {'canonicalTitle': 'Naruto'}},
+            {'id': '2', 'attributes': {'canonicalTitle': 'Naruto Shippuden'}},
+          ],
+        });
+      }),
+    );
+
+    final results = await api.searchSuggestions('naruto');
+
+    expect(requested.queryParameters['filter[text]'], 'naruto');
+    expect(requested.queryParameters['page[limit]'], '6');
+    expect(results.map((anime) => anime.title), ['Naruto', 'Naruto Shippuden']);
+  });
 }

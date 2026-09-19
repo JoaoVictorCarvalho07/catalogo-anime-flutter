@@ -6,6 +6,7 @@ import '../providers/auth_provider.dart';
 import '../services/anime_api_service.dart';
 import '../services/api_exception.dart';
 import '../widgets/anime_grid.dart';
+import '../widgets/anime_search_field.dart';
 import '../widgets/empty_view.dart';
 import '../widgets/error_view.dart';
 import '../widgets/loading_view.dart';
@@ -22,6 +23,7 @@ class CatalogScreen extends StatefulWidget {
 
 class _CatalogScreenState extends State<CatalogScreen> {
   final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   final List<Anime> _animes = [];
   late final AnimeApiService _api;
   late Future<void> _initialLoad;
@@ -39,6 +41,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -103,6 +106,11 @@ class _CatalogScreenState extends State<CatalogScreen> {
   }
 
   void _openDetail(Anime anime) => DetailScreen.open(context, anime);
+
+  void _openSuggestion(Anime anime) {
+    _searchFocusNode.unfocus();
+    _openDetail(anime);
+  }
 
   void _push(Widget screen) {
     Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => screen));
@@ -175,16 +183,12 @@ class _CatalogScreenState extends State<CatalogScreen> {
   }
 
   Widget _buildSearchBar(BuildContext context) {
-    final field = TextField(
+    final field = AnimeSearchField(
       controller: _searchController,
-      textInputAction: TextInputAction.search,
-      onSubmitted: (_) => _search(),
-      decoration: const InputDecoration(
-        labelText: 'Buscar anime pelo nome',
-        hintText: 'Ex.: One Piece',
-        prefixIcon: Icon(Icons.search),
-        border: OutlineInputBorder(),
-      ),
+      focusNode: _searchFocusNode,
+      loadSuggestions: _api.searchSuggestions,
+      onSubmitted: _search,
+      onSuggestionSelected: _openSuggestion,
     );
     final button = ElevatedButton(
       onPressed: _isSearching ? null : _search,
